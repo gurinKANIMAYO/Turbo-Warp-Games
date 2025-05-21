@@ -1,19 +1,25 @@
-// node.js
-const http = require('http');
-const httpProxy = require('http-proxy');
+const WebSocket = require('ws');
 
-const proxy = httpProxy.createProxyServer({});
-const target = 'risk-olympus.gl.at.ply.gg:2416';
+// WebSocketサーバーをポート8080で起動
+const wss = new WebSocket.Server({ port: 8080 });
 
-const server = http.createServer((req, res) => {
-  proxy.web(req, res, { target, changeOrigin: true }, (err) => {
-    console.error('Proxy error:', err);
-    res.writeHead(502);
-    res.end('Bad gateway');
+console.log('WebSocket server is running on ws://localhost:8080');
+
+wss.on('connection', function connection(ws) {
+  console.log('Client connected.');
+
+  ws.on('message', function incoming(message) {
+    console.log('Received:', message.toString());
+
+    // 全クライアントにメッセージをブロードキャスト
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(message.toString());
+      }
+    });
   });
-});
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Reverse proxy running on http://localhost:${PORT} → ${target}`);
+  ws.on('close', () => {
+    console.log('Client disconnected.');
+  });
 });
