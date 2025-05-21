@@ -2,7 +2,7 @@
   "name": "websocket-chat-server",
   "version": "1.0.0",
   "description": "WebSocket server for TurboWarp extension and chat",
-  "main": "server.js",
+  "main": "node.js",
   "scripts": {
     "start": "node server.js"
   },
