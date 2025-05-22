@@ -1,1 +1,3 @@
-# Turbo-Warp-Games
+Turbo-Warp-Games
+とは2025年5月20日創立した会社。
+りっし、あつひろの二人で運営している
