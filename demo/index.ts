@@ -1,11 +1,10 @@
 // chat_app.ts
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts"; // http/server.ts のパスは変更なし
 import {
-  acceptWebSocket, // この関数はupgradeWebSocketの内部で使われるため、明示的にimportする必要はなくなりました
   isWebSocketCloseEvent,
   isWebSocketPingEvent,
   WebSocket,
-} from "https://deno.land/std@0.224.0/websocket/mod.ts";
+} from "https://deno.land/std@0.224.0/ws/mod.ts"; // <-- ここを /ws/mod.ts に変更
 
 const clients = new Map<string, WebSocket>(); // クライアントを管理するためのMap
 
