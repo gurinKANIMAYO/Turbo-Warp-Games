@@ -39,6 +39,6 @@ jobs:
         with:
           project: "gurinkanima-turbo-warp-53"
           entrypoint: "demo/node.js"
-          root: ""
+          root: "demo/"
           
           
