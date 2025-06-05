@@ -1,52 +1,49 @@
-// chat_app.ts
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts"; // http/server.ts のパスは変更なし
+// chat_app.ts (または index.ts)
+
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts"; // これはOK
 import {
   isWebSocketCloseEvent,
   isWebSocketPingEvent,
   WebSocket,
-} from "https://deno.land/std@0.224.0/ws/mod.ts"; // <-- ここを /ws/mod.ts に変更
+} from "https://deno.land/std@0.224.0/ws/mod.ts"; // <-- ここが最も重要！
+                                                 // 「websocket/mod.ts」ではなく「ws/mod.ts」になっていることを確認！
 
-const clients = new Map<string, WebSocket>(); // クライアントを管理するためのMap
+const clients = new Map<string, WebSocket>();
 
 async function handleWs(sock: WebSocket, clientId: string) {
   console.log(`新しいクライアントが接続しました: ${clientId}`);
-  clients.set(clientId, sock); // クライアントを追加
+  clients.set(clientId, sock);
 
   try {
     for await (const ev of sock) {
       if (typeof ev === "string") {
-        // テキストメッセージを受信
         console.log(`メッセージ受信 from ${clientId}: ${ev}`);
-        // 全てのクライアントにメッセージをブロードキャスト
         for (const [id, clientSock] of clients) {
           if (clientSock.readyState === WebSocket.OPEN) {
             await clientSock.send(`${clientId}: ${ev}`);
           }
         }
       } else if (isWebSocketPingEvent(ev)) {
-        // Pingイベントを受信 (Denoが自動的にPongを返します)
-        // console.log("Ping受信");
+        // Pingイベント
       } else if (isWebSocketCloseEvent(ev)) {
-        // クローズイベントを受信
         const { code, reason } = ev;
         console.log(`WebSocketが閉じられました ${clientId}: ${code} ${reason ? reason : ""}`);
-        clients.delete(clientId); // クライアントを削除
+        clients.delete(clientId);
       }
     }
   } catch (err) {
     console.error(`WebSocketエラー ${clientId}: ${err}`);
   } finally {
-    clients.delete(clientId); // エラー時もクローズ時もクライアントを削除
+    clients.delete(clientId);
     console.log(`クライアントが切断されました: ${clientId}`);
   }
 }
 
 async function handler(req: Request) {
-  // WebSocket接続のアップグレード
   if (req.url.endsWith("/ws")) {
     try {
       const { socket, response } = Deno.upgradeWebSocket(req);
-      const clientId = crypto.randomUUID(); // ユニークなクライアントIDを生成
+      const clientId = crypto.randomUUID();
       handleWs(socket, clientId);
       return response;
     } catch (err) {
@@ -55,7 +52,6 @@ async function handler(req: Request) {
     }
   }
 
-  // 静的ファイル (index.html) の提供
   const url = new URL(req.url);
   const filePath = url.pathname === "/" ? "./index.html" : `.${url.pathname}`;
 
@@ -87,8 +83,6 @@ async function handler(req: Request) {
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
 
-        // WebSocket接続
-        // サーバーが同じホストで動作している場合、window.location.host を使用します
         const ws = new WebSocket(\`ws://\${window.location.host}/ws\`);
 
         ws.onopen = (event) => {
@@ -99,7 +93,7 @@ async function handler(req: Request) {
         ws.onmessage = (event) => {
             const message = event.data;
             messagesDiv.innerHTML += \`<p>\${message}</p>\`;
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // スクロールを一番下へ
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         };
 
         ws.onclose = (event) => {
@@ -126,7 +120,7 @@ async function handler(req: Request) {
             const message = messageInput.value.trim();
             if (message) {
                 ws.send(message);
-                messageInput.value = ''; // 入力フィールドをクリア
+                messageInput.value = '';
             }
         }
     </script>
@@ -138,7 +132,6 @@ async function handler(req: Request) {
     });
   }
 
-  // その他の静的ファイルは現状サポートしません
   return new Response("Not Found", { status: 404 });
 }
 
