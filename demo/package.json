@@ -1,1 +1,17 @@
-
+{
+  "name": "simple-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js", // または "src/demo/node.js" など、あなたのエントリーポイントファイル
+  "scripts": {
+    "start": "node app.js", // または "node src/demo/node.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
