@@ -1,16 +1,12 @@
-const express = require('express');
-const http = require('http'); // Expressサーバーに必要
-const WebSocket = require('ws');
-const path = require('path'); // ファイルパスの解決に必要
-
 const app = express();
-const server = http.createServer(app); // ExpressアプリからHTTPサーバーを作成
-const wss = new WebSocket.Server({ server }); // HTTPサーバー上でWebSocketサーバーを起動
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
-const PORT = process.env.PORT || 3000; // 環境変数があればそれを使用、なければ3000番ポート
+const PORT = process.env.PORT || 3000;
 
-// --- 静的ファイルの配信 (HTML, CSS, JSなど) ---
-// ルートパス (/) にアクセスされたときにindex.htmlの内容を返す
+// --- 静的ファイルの配信 (HTML、CSS、JSをここで提供する) ---
+// ここでクライアントに送るHTML文字列を定義します。
+// このHTML文字列の中に、ブラウザで動くJavaScriptを含めます。
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -18,7 +14,7 @@ app.get('/', (req, res) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>シンプルなチャット (単一ファイル)</title>
+            <title>シンプルなチャット</title>
             <style>
                 body { font-family: sans-serif; margin: 20px; }
                 #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
@@ -27,18 +23,17 @@ app.get('/', (req, res) => {
             </style>
         </head>
         <body>
-            <h1>シンプルなチャット (単一ファイル)</h1>
+            <h1>シンプルなチャット</h1>
             <div id="messages"></div>
             <input type="text" id="messageInput" placeholder="メッセージを入力してください">
             <button id="sendButton">送信</button>
 
             <script>
+                // ****** ここからがブラウザで実行されるJavaScriptです ******
                 const messagesDiv = document.getElementById('messages');
                 const messageInput = document.getElementById('messageInput');
                 const sendButton = document.getElementById('sendButton');
 
-                // WebSocketサーバーへの接続
-                // この場合、HTMLを提供しているのと同じサーバーに接続します
                 const ws = new WebSocket('ws://' + window.location.host);
 
                 ws.onopen = () => {
@@ -47,10 +42,9 @@ app.get('/', (req, res) => {
                 };
 
                 ws.onmessage = event => {
-                    // サーバーからメッセージを受信したとき
                     const message = event.data;
-                    messagesDiv.innerHTML += `<p>${message}</p>`;
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight; // スクロールを一番下へ
+                    messagesDiv.innerHTML += \`<p>\${message}</p>\`; // <= エラーになった行はここにあるべき
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 };
 
                 ws.onclose = () => {
@@ -60,43 +54,42 @@ app.get('/', (req, res) => {
 
                 ws.onerror = error => {
                     console.error('WebSocketエラー:', error);
-                    messagesDiv.innerHTML += `<p style="color: red;"><em>エラーが発生しました: ${error.message}</em></p>`;
+                    messagesDiv.innerHTML += \`<p style="color: red;"><em>エラーが発生しました: \${error.message}</em></p>\`;
                 };
 
                 sendButton.onclick = () => {
                     const message = messageInput.value;
                     if (message) {
-                        ws.send(message); // メッセージをサーバーに送信
-                        messageInput.value = ''; // 入力フィールドをクリア
+                        ws.send(message);
+                        messageInput.value = '';
                     }
                 };
 
-                // Enterキーでメッセージを送信
                 messageInput.addEventListener('keypress', event => {
                     if (event.key === 'Enter') {
                         sendButton.click();
                     }
                 });
+                // ****** ここまでがブラウザで実行されるJavaScriptです ******
             </script>
         </body>
         </html>
     `);
 });
 
-// --- WebSocketチャット機能 ---
+// --- WebSocketチャット機能 (サーバーサイドのロジック) ---
 console.log('WebSocketサーバーが起動中...');
 
-const clients = new Set(); // 接続中のクライアントを格納するセット
+const clients = new Set();
 
 wss.on('connection', ws => {
     console.log('新しいクライアントが接続しました。');
-    clients.add(ws); // クライアントをセットに追加
+    clients.add(ws);
 
     ws.on('message', message => {
         const messageString = message.toString();
         console.log(`メッセージを受信しました: ${messageString}`);
 
-        // 全ての接続中のクライアントにメッセージをブロードキャスト
         clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(messageString);
@@ -106,7 +99,7 @@ wss.on('connection', ws => {
 
     ws.on('close', () => {
         console.log('クライアントが切断しました。');
-        clients.delete(ws); // クライアントをセットから削除
+        clients.delete(ws);
     });
 
     ws.on('error', error => {
@@ -119,3 +112,4 @@ server.listen(PORT, () => {
     console.log(`サーバーが http://localhost:${PORT} で起動しました。`);
     console.log(`ブラウザで http://localhost:${PORT} にアクセスしてください。`);
 });
+```
