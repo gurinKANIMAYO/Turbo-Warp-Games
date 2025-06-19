@@ -1,0 +1,56 @@
+[
+	{
+		"id": 1,
+		"name": "air",
+		"solid": false
+	},
+	{
+		"id": 2,
+		"name": "dirt",
+		"solid": true,
+		"texture": "dirt"
+	},
+	{
+		"id": 3,
+		"name": "stone",
+		"solid": true,
+		"texture": "stone"
+	},
+	{
+		"id": 4,
+		"name": "oak",
+		"solid": true,
+		"top": "oak_top",
+		"side": "oak_side",
+		"bottom": "oak_top"
+	},
+	{
+		"id": 5,
+		"name": "grass",
+		"solid": true,
+		"top": "grass_top",
+		"side": "grass_side",
+		"bottom": "dirt"
+	},
+	{
+		"id": 6,
+		"name": "water",
+		"solid": true,
+		"texture": "water",
+		"transparent": true
+	},
+	{
+		"id": 7,
+		"name": "sand",
+		"solid": true,
+		"texture": "sand"
+	},
+	{
+		"id": 8,
+		"name": "leaves_oak",
+		"solid": true,
+		"texture": "leaves_oak",
+		"individual": true,
+		"transparent": true
+	}
+]
