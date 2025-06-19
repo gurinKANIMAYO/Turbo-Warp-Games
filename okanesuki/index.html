@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10個の動画表示</title>
+</head>
+<body>
+    <h1>動画を一斉に表示</h1>
+    <div id="video-container"></div>
+
+    <script>
+        const videoFiles = [
+            "video1.mp4", "video2.mp4", "video3.mp4", "video4.mp4", "video5.mp4",
+            "video6.mp4", "video7.mp4", "video8.mp4", "video9.mp4", "video10.mp4"
+        ]; // 動画ファイル名をここにリストアップ！
+
+        const container = document.getElementById("video-container");
+
+        videoFiles.forEach(file => {
+            const video = document.createElement("video");
+            video.src = file;
+            video.controls = true;
+            video.width = 320; // 動画の幅を設定
+            video.height = 180; // 動画の高さを設定
+            container.appendChild(video);
+        });
+    </script>
+</body>
+</html>
